@@ -1,0 +1,34 @@
+CREATE TABLE UsersTb (
+    id INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
+    name TEXT NOT NULL,
+    email TEXT NOT NULL,
+    password TEXT NOT NULL,
+    address TEXT
+);
+
+insertUser:
+INSERT OR REPLACE
+INTO UsersTb(
+    id,
+    name,
+    email,
+    password,
+    address
+) VALUES(?, ?, ?, ?, ?);
+
+
+selectAllUsers:
+SELECT * FROM UsersTb;
+
+selectUserByUserId:
+SELECT *
+FROM UsersTb
+WHERE id = ?;
+
+deleteUserByUserId:
+DELETE FROM  UsersTb
+WHERE id = ?;
+
+removeAllUsers:
+DELETE FROM UsersTb;
+

@@ -4,21 +4,24 @@ plugins {
     alias(libs.plugins.kotlinMultiplatform)
     alias(libs.plugins.androidApplication)
     alias(libs.plugins.jetbrainsCompose)
-
     // new
     alias(libs.plugins.kotlinxSerialization)
+    alias(libs.plugins.ksp)
+    alias(libs.plugins.room)
     alias(libs.plugins.sqldelight)
 
 }
 
 kotlin {
     androidTarget {
+        androidTarget() // <-- please register this Android target
         compilations.all {
             kotlinOptions {
                 jvmTarget = "11"
             }
         }
     }
+
 
     jvm("desktop")
 
@@ -36,9 +39,24 @@ kotlin {
     sourceSets {
         val desktopMain by getting
 
+
+        iosMain.dependencies {
+            // SqlDelight
+            implementation(libs.ktor.client.darwin)
+            implementation(libs.native.driver)
+        }
         androidMain.dependencies {
             implementation(libs.compose.ui.tooling.preview)
             implementation(libs.androidx.activity.compose)
+
+            // new
+            implementation(libs.koin.android)
+            implementation(libs.koin.androidx.compose)
+
+            // SqlDelight
+            implementation(libs.runtime)
+            implementation(libs.ktor.client.android)
+            implementation(libs.android.driver)
         }
         commonMain.dependencies {
             implementation(compose.runtime)
@@ -53,11 +71,29 @@ kotlin {
             implementation(libs.ktor.client.core)
             implementation(libs.ktor.client.content.negotiation)
             implementation(libs.ktor.serialization.kotlinx.json)
+            implementation(libs.sqlite.bundled)
+            implementation(libs.room.runtime)
+
+            api(libs.koin.core)
+            implementation(libs.lifecycle.viewmodel)
+            implementation(libs.navigation.compose)
+
+            // SqlDelight
+            implementation(libs.runtime)
+            implementation(libs.runtime)
+            implementation(libs.kotlinx.datetime)
+
+            // Moko MVVM
+            implementation(libs.mvvm.core)
+            implementation(libs.mvvm.livedata)
+
+            api(libs.koin.core)
 
         }
 
         desktopMain.dependencies {
             implementation(compose.desktop.currentOs)
+            implementation(libs.sqlite.driver)
         }
     }
 }
@@ -104,6 +140,32 @@ compose.desktop {
             targetFormats(TargetFormat.Dmg, TargetFormat.Msi, TargetFormat.Deb)
             packageName = "kmp.project.composekmm"
             packageVersion = "1.0.0"
+        }
+    }
+}
+room {
+    schemaDirectory("$projectDir/schemas")
+}
+dependencies {
+    implementation(libs.androidx.material3.android)
+    ksp(libs.room.compiler)
+    implementation(libs.koin.core)
+    implementation(libs.koin.compose)
+    implementation(libs.koin.androidx.compose)
+    implementation(libs.navigation.compose)
+    implementation(libs.coil.compose)
+    implementation(libs.google.navigation.compose)
+    implementation(libs.accompanist.systemuicontroller)
+    implementation(libs.koin.androidx.compose.v320)
+
+    implementation(libs.lifecycle.viewmodel)
+    implementation(libs.navigation.compose)
+
+}
+sqldelight {
+    databases {
+        create("AppDatabase") {
+            packageName.set("com.tufelmalik.composekmm")
         }
     }
 }
