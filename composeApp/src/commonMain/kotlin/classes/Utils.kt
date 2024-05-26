@@ -1,10 +1,16 @@
 package classes
 
+import androidx.compose.ui.graphics.Color
+import com.tufelmalik.composekmm.AppDatabase
+import database.local.DriverFactory
+import database.local.SqlDelightUsersDataSource
 import kotlinx.datetime.Clock
 import kotlinx.datetime.LocalDateTime
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.toInstant
 import kotlinx.datetime.toLocalDateTime
+import repositories.UsersRepositoryImp
+import viewmodel.UsersViewModel
 
 object Utils {
     const val movieBaseUrl = "https://api.themoviedb.org/3"
@@ -14,11 +20,28 @@ object Utils {
 
     private const val sqlCodeGenerator = "./gradlew generateCommonMainAppDatabaseInterface"
 
-    const val RedOrangeHex = 0xffffab91
-    const val RedPinkHex = 0xfff48fb1
-    const val BabyBlueHex = 0xff81deea
-    const val VioletHex = 0xffcf94da
-    const val LightGreenHex = 0xffe7ed9b
+    val RedOrangeHex: Color = Color(0xffffab914da)
+    val BabyBlueHex: Color = Color(0xff81deea)
+    val VioletHex: Color = Color(0xffcf94da)
+    val LightGreenHex: Color = Color(0xffe7ed9b)
+    val RedPinkHex: Color = Color(0xfff48fb1)
+    val LightBlueHex: Color = Color(0xff81deea)
+    val Violet2Hex: Color = Color(0xffcf94da)
+    val LightGreen2Hex: Color = Color(0xffe7ed9b)
+    val RedPink2Hex: Color = Color(0xfff48fb1)
+    val LightBlue2Hex: Color = Color(0xff81deea)
+    val Violet3Hex: Color = Color(0xffcf94da)
+    val LightGreen3Hex: Color = Color(0xffe7ed9b)
+    val RedPink3Hex: Color = Color(0xfff48fb1)
+
+
+    fun provideUsersViewModel(): UsersViewModel {
+        val driver = DriverFactory().createDriver()
+        val database = AppDatabase(driver)
+        val usersDataSource = SqlDelightUsersDataSource(database)
+        val usersRepository = UsersRepositoryImp(usersDataSource)
+        return UsersViewModel(usersRepository)
+    }
 
     fun now(): LocalDateTime {
         return Clock.System.now().toLocalDateTime(TimeZone.currentSystemDefault())

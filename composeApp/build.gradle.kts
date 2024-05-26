@@ -160,6 +160,7 @@ dependencies {
 
     implementation(libs.lifecycle.viewmodel)
     implementation(libs.navigation.compose)
+    implementation(libs.kotlinx.coroutines.android)
 
 }
 sqldelight {

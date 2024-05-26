@@ -4,6 +4,7 @@ import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
@@ -25,11 +26,13 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusDirection
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.text.input.ImeAction
@@ -37,22 +40,20 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.tufelmalik.composekmm.AppDatabase
-import database.local.DriverFactory
-import database.local.SqlDelightUsersDataSource
+import androidx.navigation.NavHostController
+import classes.Utils
+import classes.Utils.provideUsersViewModel
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.IO
+import kotlinx.coroutines.launch
 import model.Users
-import repositories.UsersRepositoryImp
-import viewmodel.UsersViewModel
 
 
 @Composable
-fun ManageUsersScreen() {
+fun ManageUsersScreen(navController: NavHostController) {
 
-    val driver = DriverFactory().createDriver()
-    val database = AppDatabase(driver)
-    val usersDataSource = SqlDelightUsersDataSource(database)
-    val usersRepository = UsersRepositoryImp(usersDataSource)
-    val usersViewModel = UsersViewModel(usersRepository)
+    val usersViewModel = provideUsersViewModel()
     val users = usersViewModel.usersLiveData.collectAsState()
 
     println("Users List : $users")
@@ -112,8 +113,10 @@ fun ManageUsersScreen() {
                     name = name, email = email, password = password, address = address
                 )
             )
-            val a= usersViewModel.usersLiveData.value
-            println("\n\n\nData :\n$a \n\n")
+            CoroutineScope(Dispatchers.IO).launch {
+                val userData = usersViewModel.usersLiveData.value
+                println("\n\n\nData :$userData \n\n")
+            }
             isAllInputVerified = true
         } else {
             println("Failed to save data!")
@@ -122,17 +125,28 @@ fun ManageUsersScreen() {
 
     }
 
-
+    val rainbowColors: List<Color> = listOf(
+        Utils.VioletHex,
+        Utils.LightGreenHex,
+//        Utils.BabyBlueHex,
+//        Utils.RedPinkHex,
+//        Utils.RedOrangeHex
+    )
+    val brush = remember {
+        Brush.linearGradient(colors = rainbowColors)
+    }
     Column(
-        modifier = Modifier.fillMaxSize().verticalScroll(scrollState).padding(20.dp),
+        modifier = Modifier.fillMaxSize().verticalScroll(scrollState)
+            .background(brush = brush)
+            .padding(20.dp),
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Center
     ) {
         Text(
             text = "Register to out app",
             style = MaterialTheme.typography.h5,
-            modifier = Modifier.padding(vertical = 20.dp),
-            color = Color.Blue
+            modifier = Modifier.padding(vertical = 25.dp),
+            color = Color.White,
         )
 
 
@@ -231,6 +245,15 @@ fun ManageUsersScreen() {
             shape = RoundedCornerShape(20.dp),
             content = { Text("Validate Input") }
         )
+        Button(
+            onClick = {
+                navController.navigate("ManageUserListScreen")
+            },
+            modifier = Modifier.padding(vertical = 20.dp),
+            shape = RoundedCornerShape(20.dp),
+            content = { Text("Manage Users List") }
+        )
+
         AnimatedVisibility(
             visible = isAllInputVerified,
             enter = fadeIn(
@@ -243,7 +266,7 @@ fun ManageUsersScreen() {
             )
         ) {
             Text(
-                text = "Data saved successfully.\n${usersViewModel.getAllUsers()}",
+                text = "Data saved successfully.",
                 textAlign = TextAlign.Center,
                 fontSize = 25.sp,
                 modifier = Modifier.padding(top = 5.dp),

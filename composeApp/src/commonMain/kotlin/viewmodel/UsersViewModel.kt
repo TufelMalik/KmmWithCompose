@@ -21,9 +21,7 @@ class UsersViewModel(private val repository: UsersRepositoryImp) : ViewModel() {
     }
 
     fun getAllUsers() {
-        viewModelScope.launch {
-            repository.getAllUsers()
-        }
+       loadUsersData()
     }
 
     fun getUserById(id: Long) {
